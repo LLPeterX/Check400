@@ -29,21 +29,20 @@ namespace Check400
                 this.tFileXML.Text = openXMLDialog.FileName;
             }
 
-
             // Пробуем определить, какой файл XSD следует использовать
-            string xml_file = Path.GetFileName(tFileXML.Text); // чистое имя файла
-            string xml_id = GetFileId(xml_file); // "BNS", "PB" и проч.
+            string xmlFileName = Path.GetFileName(tFileXML.Text); // чистое имя файла
+            string xmlFileID = GetFileId(xmlFileName); // "BNS", "PB" и проч.
             // Сначала ищем файл в текущем каталоге
-            string xsdName = "440-П_" + xml_id + ".xsd";
-            string xsdPath = currentDirectory + "\\" + xsdName;
-            if (File.Exists(xsdPath)) {
-                tFileXSD.Text = xsdPath;
+            string xsdFileName = "440-П_" + xmlFileID + ".xsd";
+            string xsdFilePath = currentDirectory + "\\" + xsdFileName;
+            if (File.Exists(xsdFilePath)) {
+                tFileXSD.Text = xsdFilePath;
             } else  {
                 // ищем файл подкаталоге "XSD" каталога запуска программы
-                xsdPath = Application.StartupPath + "\\XSD\\" + xsdName;
-                if (File.Exists(xsdPath))
+                xsdFilePath = Application.StartupPath + "\\XSD\\" + xsdFileName;
+                if (File.Exists(xsdFilePath))
                 {
-                    tFileXSD.Text = xsdPath;
+                    tFileXSD.Text = xsdFilePath;
                 }
             }
             tMessage.Text = "";
@@ -70,42 +69,54 @@ namespace Check400
         private void buttonCheck_Click(object sender, EventArgs e)
         {
             
-            string xml_file = tFileXML.Text;
-            string xsd_file = tFileXSD.Text;
+            string xmlFileName = tFileXML.Text;
+            string xsdFileName = tFileXSD.Text;
             tMessage.Text = "";
-            // Поверяем существование файлов
-            if (!File.Exists(xml_file)) {
-                MessageBox.Show("Не найден файл XML:\n" + xml_file);
+            // Поверяем существование файлов XML и XSD
+            if (!File.Exists(xmlFileName)) {
+                //MessageBox.Show("Не найден файл XML:\n" + xmlFileName);
+                tMessage.Text = "Не найден файл XML:\n" + xmlFileName;
                 return;
             }
-            if (!File.Exists(xsd_file))
+            if (!File.Exists(xsdFileName))
             {
-                MessageBox.Show("Не найден файл XSD:\n" + xsd_file);
+                //MessageBox.Show("Не найден файл XSD:\n" + xsdFileName);
+                tMessage.Text = "Не найден файл XSD:\n" + xsdFileName;
                 return;
             }
+            // пробуем определить целевое пространство имен из файла схемы
+            
             XmlDocument xsd = new XmlDocument();
-            xsd.Load(xsd_file);
-            string targetNamespace = xsd.DocumentElement.GetAttribute("targetNamespace");
-            if (targetNamespace == null)
+            try
             {
-                targetNamespace = "";
+                xsd.Load(xsdFileName);
+            } catch (Exception ex)
+            {
+                tMessage.Text = "Ошибка в файле схемы " + xsdFileName+"\n"+ex.Message;
+                return;
             }
-            MessageBox.Show("Namespace=" + targetNamespace);
+            string targetNamespace = xsd.DocumentElement.GetAttribute("targetNamespace");
+            if (targetNamespace == null)  targetNamespace = "";
             XmlReaderSettings settings = new XmlReaderSettings();
-            settings.Schemas.Add(targetNamespace, xsd_file);
+            settings.Schemas.Add(targetNamespace, xsdFileName);
             settings.ValidationType = ValidationType.Schema;
             settings.ValidationFlags = settings.ValidationFlags | XmlSchemaValidationFlags.ReportValidationWarnings;
-            XmlReader reader = XmlReader.Create(xml_file, settings);
+            XmlReader reader = XmlReader.Create(xmlFileName, settings);
             XmlDocument xml = new XmlDocument();
             xml.PreserveWhitespace = true;
             try
             {
                 // Пробуем определить значение namespace для файлов "440_П_xxx.xsd"
                 xml.Load(reader);
+                string xmlns = xml.DocumentElement.GetAttribute("xmlns");
+                if (xmlns == null) xmlns = "";
+                if(xmlns != targetNamespace)
+                {
+                    throw new Exception("Namespace отличаются:\nВ XML: "+xmlns+"\nВ XSD: "+targetNamespace);
+                }
                 tMessage.Text = "Успешно";
             } catch (Exception ex) {
                 tMessage.Text = ex.Message;
-                MessageBox.Show(ex.Message);
             }
             reader.Close();
         } // buttonCheck_Click

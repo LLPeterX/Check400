@@ -16,7 +16,6 @@ namespace Check400
         public Form1()
         {
             InitializeComponent();
-            
         }
 
         private void buttonOpenXML_Click(object sender, EventArgs e)
@@ -30,7 +29,7 @@ namespace Check400
             }
 
             // Пробуем определить, какой файл XSD следует использовать
-            string xmlFileName = Path.GetFileName(tFileXML.Text); // чистое имя файла
+            string xmlFileName = Path.GetFileName(tFileXML.Text); // чистое имя файла без каталога
             string xmlFileID = GetFileId(xmlFileName); // "BNS", "PB" и проч.
             // Сначала ищем файл в текущем каталоге
             string xsdFileName = "440-П_" + xmlFileID + ".xsd";
@@ -63,6 +62,10 @@ namespace Check400
             if (!String.IsNullOrEmpty(openXSDDialog.FileName))
             {
                 tFileXSD.Text = openXSDDialog.FileName;
+                if (!String.IsNullOrEmpty(tFileXML.Text))
+                {
+                    buttonCheck_Click(null, null);
+                }
             }
         }
 
@@ -118,6 +121,7 @@ namespace Check400
             XmlReader r = (XmlReader)sender;
             if (r.NodeType == XmlNodeType.Attribute)
             {
+                // как получить родительский элемент текущего ошибочного атрибута ?
                 tMessage.AppendText(String.Format("Line {0} Column {1}: Ошибка: {2}\r\n\r\n", lineInfo.LineNumber, lineInfo.LinePosition,
                    e.Message));
             }

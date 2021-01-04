@@ -30,14 +30,17 @@ namespace Check400
 
             // Пробуем определить, какой файл XSD следует использовать
             string xmlFileName = Path.GetFileName(tFileXML.Text); // чистое имя файла без каталога
-            string xmlFileID = GetFileId(xmlFileName); // "BNS", "PB" и проч.
+            string xmlFileID = GetFileID(xmlFileName); // "BNS", "PB" и проч.
             // Сначала ищем файл в текущем каталоге
             string xsdFileName = "440-П_" + xmlFileID + ".xsd";
             string xsdFilePath = currentDirectory + "\\" + xsdFileName;
-            if (File.Exists(xsdFilePath)) {
+            if (File.Exists(xsdFilePath))
+            {
                 tFileXSD.Text = xsdFilePath;
-            } else  {
-                // ищем файл подкаталоге "XSD" каталога запуска программы
+            }
+            else
+            {
+                // если не нашли - ищем файл подкаталоге "XSD" каталога запуска программы
                 xsdFilePath = Application.StartupPath + "\\XSD\\" + xsdFileName;
                 if (File.Exists(xsdFilePath))
                 {
@@ -53,7 +56,8 @@ namespace Check400
             if (!String.IsNullOrEmpty(tFileXSD.Text))
             {
                 currentDirectory = Path.GetDirectoryName(tFileXSD.Text);
-            }else
+            }
+            else
             {
                 currentDirectory = Environment.CurrentDirectory;
             }
@@ -71,19 +75,18 @@ namespace Check400
 
         private void buttonCheck_Click(object sender, EventArgs e)
         {
-            
+
             string xmlFileName = tFileXML.Text;
             string xsdFileName = tFileXSD.Text;
             tMessage.Text = "";
             // Поверяем существование файлов XML и XSD
-            if (!File.Exists(xmlFileName)) {
-                //MessageBox.Show("Не найден файл XML:\n" + xmlFileName);
+            if (!File.Exists(xmlFileName))
+            {
                 tMessage.Text = "Не найден файл XML:\n" + xmlFileName;
                 return;
             }
             if (!File.Exists(xsdFileName))
             {
-                //MessageBox.Show("Не найден файл XSD:\n" + xsdFileName);
                 tMessage.Text = "Не найден файл XSD:\n" + xsdFileName;
                 return;
             }
@@ -94,13 +97,14 @@ namespace Check400
             try
             {
                 xsd.Load(xsdFileName);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                tMessage.Text = "Ошибка в файле схемы " + xsdFileName+"\n"+ex.Message;
+                tMessage.Text = "Ошибка в файле схемы " + xsdFileName + "\n" + ex.Message;
                 return;
             }
             string targetNamespace = xsd.DocumentElement.GetAttribute("targetNamespace");
-            if (targetNamespace == null)  targetNamespace = "";
+            if (targetNamespace == null) targetNamespace = "";
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.ValidationType = ValidationType.Schema;
             settings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
@@ -112,7 +116,7 @@ namespace Check400
             reader.Close();
             if (tMessage.Text.Length == 0)
             {
-                tMessage.AppendText("Успешно");
+                tMessage.AppendText("Успешная проверка");
             }
         } // buttonCheck_Click
         public void ValidationCallBack(object sender, ValidationEventArgs e)
@@ -133,20 +137,11 @@ namespace Check400
         }
 
         // Получить ID файла (PB, BNS, ZNO  проч.)
-        private string GetFileId(string fileName)
+        private string GetFileID(string fileName)
         {
             string id = Path.GetFileName(fileName).ToUpper();
-            if (id.StartsWith("PB") || id.StartsWith("BZ"))
-            {
-                id = id.Substring(0, 2);
-            }
-            else
-            {
-                id = id.Substring(0, 3);
-            }
-            return id;
+            return (id.StartsWith("PB") || id.StartsWith("BZ")) ? id.Substring(0, 2) : id.Substring(0, 3);
         }
 
-    }
-
+    } // Form1
 }

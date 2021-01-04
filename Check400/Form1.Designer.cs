@@ -95,11 +95,12 @@
             // 
             // buttonCheck
             // 
+            this.buttonCheck.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonCheck.Location = new System.Drawing.Point(729, 13);
             this.buttonCheck.Name = "buttonCheck";
-            this.buttonCheck.Size = new System.Drawing.Size(71, 55);
+            this.buttonCheck.Size = new System.Drawing.Size(80, 55);
             this.buttonCheck.TabIndex = 6;
-            this.buttonCheck.Text = "Check";
+            this.buttonCheck.Text = "Проверка";
             this.buttonCheck.UseVisualStyleBackColor = true;
             this.buttonCheck.Click += new System.EventHandler(this.buttonCheck_Click);
             // 
@@ -113,7 +114,7 @@
             this.tMessage.Location = new System.Drawing.Point(19, 100);
             this.tMessage.Multiline = true;
             this.tMessage.Name = "tMessage";
-            this.tMessage.Size = new System.Drawing.Size(784, 243);
+            this.tMessage.Size = new System.Drawing.Size(790, 243);
             this.tMessage.TabIndex = 7;
             // 
             // label3
@@ -134,7 +135,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(815, 355);
+            this.ClientSize = new System.Drawing.Size(819, 355);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.tMessage);
             this.Controls.Add(this.buttonCheck);

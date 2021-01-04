@@ -85,7 +85,8 @@ namespace Check400
                 return;
             }
             // пробуем определить целевое пространство имен из файла схемы
-            
+            // и проверить, что оно соответствует значению атрибута xmlns элемента <Файл>
+            // (для файлов запросов targetNamespace не указан, так что "")
             XmlDocument xsd = new XmlDocument();
             try
             {
@@ -98,28 +99,34 @@ namespace Check400
             string targetNamespace = xsd.DocumentElement.GetAttribute("targetNamespace");
             if (targetNamespace == null)  targetNamespace = "";
             XmlReaderSettings settings = new XmlReaderSettings();
-            settings.Schemas.Add(targetNamespace, xsdFileName);
             settings.ValidationType = ValidationType.Schema;
-            settings.ValidationFlags = settings.ValidationFlags | XmlSchemaValidationFlags.ReportValidationWarnings;
+            settings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
+            settings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
+            settings.Schemas.Add(targetNamespace, xsdFileName);
+            settings.ValidationEventHandler += new ValidationEventHandler(ValidationCallBack);
             XmlReader reader = XmlReader.Create(xmlFileName, settings);
-            XmlDocument xml = new XmlDocument();
-            xml.PreserveWhitespace = true;
-            try
-            {
-                // Пробуем определить значение namespace для файлов "440_П_xxx.xsd"
-                xml.Load(reader);
-                string xmlns = xml.DocumentElement.GetAttribute("xmlns");
-                if (xmlns == null) xmlns = "";
-                if(xmlns != targetNamespace)
-                {
-                    throw new Exception("Namespace отличаются:\nВ XML: "+xmlns+"\nВ XSD: "+targetNamespace);
-                }
-                tMessage.Text = "Успешно";
-            } catch (Exception ex) {
-                tMessage.Text = ex.Message;
-            }
+            while (reader.Read()) { }
             reader.Close();
+            if (tMessage.Text.Length == 0)
+            {
+                tMessage.AppendText("Успешно");
+            }
         } // buttonCheck_Click
+        public void ValidationCallBack(object sender, ValidationEventArgs e)
+        {
+            IXmlLineInfo lineInfo = sender as IXmlLineInfo;
+            XmlReader r = (XmlReader)sender;
+            if (r.NodeType == XmlNodeType.Attribute)
+            {
+                tMessage.AppendText(String.Format("Line {0} Column {1}: Ошибка: {2}\r\n\r\n", lineInfo.LineNumber, lineInfo.LinePosition,
+                   e.Message));
+            }
+            else
+            {
+                tMessage.AppendText(String.Format("Line {0} Column {1}: Элемент <{2}>, Ошибка: {3}\r\n\r\n", lineInfo.LineNumber, lineInfo.LinePosition,
+                    r.Name, e.Message));
+            }
+        }
 
         // Получить ID файла (PB, BNS, ZNO  проч.)
         private string GetFileId(string fileName)

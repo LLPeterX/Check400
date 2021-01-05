@@ -125,9 +125,12 @@ namespace Check400
             XmlReader r = (XmlReader)sender;
             if (r.NodeType == XmlNodeType.Attribute)
             {
-                // как получить родительский элемент текущего ошибочного атрибута ?
-                tMessage.AppendText(String.Format("Line {0} Column {1}: Ошибка: {2}\r\n\r\n", lineInfo.LineNumber, lineInfo.LinePosition,
-                   e.Message));
+                string attrName = r.Name;
+                r.MoveToElement();
+                string elName = r.Name;
+                r.MoveToAttribute(attrName);
+                tMessage.AppendText(String.Format("Line {0} Column {1}: Элемент <{2}> Ошибка: {3}\r\n\r\n", lineInfo.LineNumber, lineInfo.LinePosition,
+                   elName, e.Message));
             }
             else
             {

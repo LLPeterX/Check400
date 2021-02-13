@@ -109,6 +109,18 @@ namespace Check400
             settings.ValidationType = ValidationType.Schema;
             settings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
             settings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
+            // если ZSN, ZSO, ZSV - то добавить "Типовые_400.xsd"
+            // наверно, стоило перенести в код buttonOpenXSD_Click(), но и так сойдет...
+            string xmlFileID = GetFileID(xmlFileName);
+            if(xmlFileID == "ZSV" || xmlFileID=="ZNO" || xmlFileID=="ZSO")
+            {
+                string typesDir = Path.GetDirectoryName(tFileXSD.Text);
+                string additionalSchemaFile = typesDir + "\\Типовые_400.xsd";
+                if(File.Exists(additionalSchemaFile))
+                {
+                    settings.Schemas.Add("",additionalSchemaFile);
+                }
+            }
             settings.Schemas.Add(targetNamespace, xsdFileName);
             settings.ValidationEventHandler += new ValidationEventHandler(ValidationCallBack);
             XmlReader reader = XmlReader.Create(xmlFileName, settings);

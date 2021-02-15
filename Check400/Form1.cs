@@ -112,9 +112,9 @@ namespace Check400
             // если ZSN, ZSO, ZSV - то добавить "Типовые_400.xsd"
             // наверно, стоило перенести в код buttonOpenXSD_Click(), но и так сойдет...
             string xmlFileID = GetFileID(xmlFileName);
-            if(xmlFileID == "ZSV" || xmlFileID=="ZNO" || xmlFileID=="ZSO")
+            if((xmlFileID == "ZSV" || xmlFileID=="ZNO" || xmlFileID=="ZSO") && xsdFileName.Contains("_400."))
             {
-                string typesDir = Path.GetDirectoryName(tFileXSD.Text);
+                string typesDir = Path.GetDirectoryName(xsdFileName);
                 string additionalSchemaFile = typesDir + "\\Типовые_400.xsd";
                 if(File.Exists(additionalSchemaFile))
                 {
